@@ -5,5 +5,4 @@ from django.shortcuts import render
 #http:// 127.0.0
 
 def index(request):
-
-    return  render(request,'index.html')
+    return render(request, 'index.html')
