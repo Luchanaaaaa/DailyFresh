@@ -156,5 +156,16 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Settings to send email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Server address of SMTP
+EMAIL_HOST = 'smtp.163.com'
+#SMTP PORT
+EMAIL_PORT = 25
+#发送邮件的邮箱
+EMAIL_HOST_USER = 'yvonneplayground@163.com'
+# The client authorization password set in the mailbox
+EMAIL_HOST_PASSWORD = 'CWOKULKDZZHXLBBG'
+#收件人看到的发件人
+EMAIL_FROM = 'DailyFresh<yvonneplayground@163.com>'
 
