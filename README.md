@@ -19,8 +19,10 @@ To fix this error, you should replace `{% load staticfiles %}` with `{% load sta
 
 
 ### 2. `view` Files
-#### `user/views.py`
+#### 2.1 `user/views.py`
 `from django.core.urlresolvers import reverse`  should be replaced by `from django.urls import reverse`
+
+
 
 ## Appendix
  <a name="anchor"></a> 
@@ -58,3 +60,17 @@ The way I used:
   # Creat token
   encodedJwt = jwt.encode(infEncode, settings.SECRET_KEY, algorithm="HS256")
 ```
+2. To send email with HTML format
+```python
+        subject = "Welcome to Yvonne's PlayGround project: DailyFresh"
+        message = ''
+        htmlMessage = '<h1>%s, Welcome to yvonne&apos;s websit: DailyFresh</h1> <br/> " \
+                  "Please active your account by click this link : <a href ="http://127.0.0.1:8000/user/active/%s"> http://127.0.0.1:8000/user/active/%s </a>' %(username, token, token)
+        sender = settings.EMAIL_FROM
+        receiver = [email]
+        send_mail(subject, message, sender, receiver, html_message= htmlMessage)
+
+```
+
+
+
