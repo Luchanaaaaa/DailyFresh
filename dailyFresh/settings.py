@@ -169,3 +169,6 @@ EMAIL_HOST_PASSWORD = ''
 #收件人看到的发件人
 EMAIL_FROM = 'DailyFresh<mydailyfresh@163.com>'
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+
