@@ -27,50 +27,77 @@ To fix this error, you should replace `{% load staticfiles %}` with `{% load sta
 ## Appendix
  <a name="anchor"></a> 
 1.  Send active email after registion
-An example to use `python-jose`:   
+       1. Token 
+       An example to use `python-jose`:   
 
-```python
-pip install python-jose
-# install the libray at terminal at first
+       ```python
+       pip install python-jose
+       # install the libray at terminal at first
 
-from datetime import datetime, timedelta
-from jose import jwt
-# SecretKey
-SECRET_KEY = "kkkkk"
+       from datetime import datetime, timedelta
+       from jose import jwt
+       # SecretKey
+       SECRET_KEY = "kkkkk"
 
-# Set the expire time: current time + valid time  Example: 5 minutes
-expire = datetime.utcnow() + timedelta(minutes=5)
-# exp |  sub & uid: Information
-to_encode = {"exp": expire, "sub": str(123), "uid": "12345"}
-# creat token 
-encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
-print(encoded_jwt) 
-# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTU1MDg5MzQsInN1YiI6IjEyMyIsInVpZCI6IjEyMzQ1In0.lttAYe808lVQgGhL9NXei2bbC1LIGs-SS0l6qfU_QxU
-```
-The way I used:   
-```python
-# Send active (active link) email http://127.0.0.1:8000/user/active/3
-  # The link must include the ID of user, but considering about safe: encryption
-  # encrpt the user information
+       # Set the expire time: current time + valid time  Example: 5 minutes
+       expire = datetime.utcnow() + timedelta(minutes=5)
+       # exp |  sub & uid: Information
+       to_encode = {"exp": expire, "sub": str(123), "uid": "12345"}
+       # creat token 
+       encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+       print(encoded_jwt) 
+       # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTU1MDg5MzQsInN1YiI6IjEyMyIsInVpZCI6IjEyMzQ1In0.lttAYe808lVQgGhL9NXei2bbC1LIGs-SS0l6qfU_QxU
+       ```
+       The way I used:   
+       ```python
+       # Send active (active link) email http://127.0.0.1:8000/user/active/3
+         # The link must include the ID of user, but considering about safe: encryption
+         # encrpt the user information
 
-  #  Set the expired time: current time + valid time  Example: 5 minutes
-  expire = datetime.utcnow() + timedelta(minutes=60)
-  # exp && information want to be encrypted
-  infEncode = {"exp": expire, 'confirm': user.id }
-  # Creat token
-  encodedJwt = jwt.encode(infEncode, settings.SECRET_KEY, algorithm="HS256")
-```
-2. To send email with HTML format
-```python
-        subject = "Welcome to Yvonne's PlayGround project: DailyFresh"
-        message = ''
-        htmlMessage = '<h1>%s, Welcome to yvonne&apos;s websit: DailyFresh</h1> <br/> " \
-                  "Please active your account by click this link : <a href ="http://127.0.0.1:8000/user/active/%s"> http://127.0.0.1:8000/user/active/%s </a>' %(username, token, token)
-        sender = settings.EMAIL_FROM
-        receiver = [email]
-        send_mail(subject, message, sender, receiver, html_message= htmlMessage)
-
-```
-
+         #  Set the expired time: current time + valid time  Example: 5 minutes
+         expire = datetime.utcnow() + timedelta(minutes=60)
+         # exp && information want to be encrypted
+         infEncode = {"exp": expire, 'confirm': user.id }
+         # Creat token
+         encodedJwt = jwt.encode(infEncode, settings.SECRET_KEY, algorithm="HS256")
+       ```
+       2. To send email with HTML format    
+       
+       ```python
+               subject = "Welcome to Yvonne's PlayGround project: DailyFresh"
+               message = ''
+               htmlMessage = '<h1>%s, Welcome to yvonne&apos;s websit: DailyFresh</h1> <br/> " \
+                         "Please active your account by click this link : <a href ="http://127.0.0.1:8000/user/active/%s"> http://127.0.0.1:8000/user/active/%s </a>' %(username, token, token)
+               sender = settings.EMAIL_FROM
+               receiver = [email]
+               send_mail(subject, message, sender, receiver, html_message= htmlMessage)
+       ```
+       3. `task.py`:  Using `Celery` and `Redis` as broker to send **Asynchronous Requests**.    
+        
+       *Remind: do not forget to install Celery and Redis at first*.   
+       `pip install celery`    
+       As you can see at ` 'redis://localhost:6379/0' `, I used local host.    
+       It should be noted that if you need to use Celery in a production environment, it is recommended to use a separate Redis instance as a message broker instead of running Redis locally.
+       ```python
+       from  celery import  Celery
+       from django.conf import settings
+       from django.core.mail import send_mail
+       import time
+       app = Celery('celery_tasks.tasks', broker='redis://localhost:6379/0')
+       @app.task
+       def sendRegisterActiveEmail(toEmail, username, token):
+           # Send active email, include the active link: http://127.0.0.1:8000/user/active/id
+           # the active link should include the User ID
+           subject = "Welcome to Yvonne's PlayGround project: DailyFresh"
+           message = ''
+           sender = settings.EMAIL_FROM
+           receiver = [toEmail]
+           htmlMessage = '<h1>%s, Welcome to yvonne&apos;s websit: DailyFresh</h1> <br/> ' \
+                          'Please active your account by click this link : <a href ="http://127.0.0.1:8000/user/active/%s"> http://127.0.0.1:8000/user/active/%s </a>' % (
+                         username, token, token)
+           # TODO： To send the verify mail
+           send_mail(subject, message, sender, receiver, html_message= htmlMessage)
+           time.sleep(5)
+       ```
 
 
