@@ -1,5 +1,5 @@
 # DailyFresh
-*Online Store Websit*
+*Online Store Website using Django*
 
 ## To Run the server:
 Using `python manage.py runserver` at Terminal
