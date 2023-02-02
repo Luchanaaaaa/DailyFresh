@@ -1,23 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+{% extends 'base.html' %}{
 {% load static %}
-<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<title>天天生鲜-注册</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
-    <!-- 这是一个 Django 模板的语句，用于引入一个静态文件（css文件）。
-
-其中，href 会被替换为 Django 项目中设置的 STATIC_URL 和静态文件路径（相对于 STATICFILES_DIRS 和 STATIC_ROOT 配置的路径），最终会生成一个能访问到该 css 文件的 url，例如 '/static/css/main.css'。
-
-这样写的好处是，如果在 Django 项目中设置了静态文件的 CDN 服务，可以通过修改 Django 项目的配置，让这个引用的静态文件从 CDN 服务器加载，而不需要修改模板中的代码。-->
-	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css'%}" >
-{#	<script type="text/javascript" src="../static/js/jquery-1.12.4.min.js"></script>#}
+{% block title %} DailyFresh - SignUp {% endblock title %}
+{% block topfiles %}
+    {# 引用jquery #} {#	<s cript type="text/javascript" src="../static/js/register.js"></script>#}
     <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
-    <! 引用jquery>
-{#	<script type="text/javascript" src="../static/js/register.js"></script>#}
     <script type="text/javascript" src="{% static 'js/register.js' %}"></script>
-</head>
-<body>
+{% endblock topfiles %}
+
+{% block header_con %} {% endblock header_con %}
+{% block search_bar %} {% endblock search_bar %}
+{% block body %}
 	<div class="register_con">
 		<div class="l_con fl">
 			<a class="reg_logo"><img src= "{% static '/images/logo02.png' %}"></a>
@@ -72,20 +64,4 @@
 		</div>
 
 	</div>
-
-	<div class="footer no-mp">
-		<div class="foot_link">
-			<a href="#">关于我们</a>
-			<span>|</span>
-			<a href="#">联系我们</a>
-			<span>|</span>
-			<a href="#">招聘人才</a>
-			<span>|</span>
-			<a href="#">友情链接</a>		
-		</div>
-		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
-		<p>电话：010-****888    京ICP备*******8号</p>
-	</div>
-	
-</body>
-</html>
+{% endblock body %}
