@@ -1,8 +1,11 @@
 # DailyFresh
 *Online Store Website using Django*
 
-## To Run the server:
-Using `python manage.py runserver` at Terminal
+## TO START
+1. Run the server:    
+Using `python manage.py runserver` at Terminal to start the server for website.    
+Using `nohup redis-server` at Terminal to start the server of *Celery*
+>Celery is an asynchronous task queue/job queue based on distributed message passing. It is written in Python and allows you to run tasks in the background while your application is still serving other requests. You can use Celery to handle long-running tasks, such as sending emails, generating reports, or processing images.
 
 ## Some detail about Function Implementation
 ### 1. [Send active email after registion](#anchor)
