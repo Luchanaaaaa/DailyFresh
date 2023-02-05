@@ -6,17 +6,21 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import View
 from django.conf import settings
-
 from datetime import datetime, timedelta
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 
-from apps.user.models import User
+# Model
+from apps.user.models import User, Address
+from apps.goods.models import GoodsSKU
 
 from django.http import HttpResponse
-
 from celery_tasks.tasks import sendRegisterActiveEmail
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+# import utils
+from utils.mixin import LoginRequiredMixin
+from django_redis import get_redis_connection
+
 
 #导入用户模型类
 # Create your views here.
@@ -178,20 +182,117 @@ class LoginView(View):
             return render(request,'login.html', {'errmsg' : 'Wrong Username or Password '})
         # Check data
 #
-class UserInfoView(View):
+
+# /User/logout
+class LogoutView(View):
+    def get(self, request):
+        # Clear Session Information of User
+        logout(request)
+
+        # Jumo
+        return redirect('goods:index')
+
+
+class UserInfoView(LoginRequiredMixin, View):
     '''用户中心-信息页'''
     def get(self, request):
-        return render(request, 'user_center_info.html', {'page':'user'})
-        print('我来了')
+
+        # Get the User's information
+        user = request.user
+        address = Address.objects.get_default_address(user)
+
+        # from redis import StrictRedis
+        # sr = StrictRedis(host='localhost', port='6379', db=3)
+        con = get_redis_connection('default')
+        history_key = 'history_%d'%user.id
+
+        #Get the newest 5 goods id
+        sku_ids = con.lrange(history_key, 0, 4)
+        # Returns the set of queries
+        # goods_li = GoodsSKU.objects.filter(id_in=sku_ids)
+        #
+        # goods_res = []
+        # for a_id in sku_ids:
+        #     for goods in goods_li:
+        #         if a_id == goods.id:
+        #             goods_res.append(goods)
+
+        # iterate to get the user's goods information
+        goods_li = []
+        for id in sku_ids:
+            goods = GoodsSKU.objects.get(id=id)
+            goods_li.append(goods)
+
+        context = {'page':'user',
+                   'address':address,
+                   'goods_li':goods_li}
+        # loop up the detail information
+
+        # Get the User's History
+        return render(request, 'user_center_info.html', context)
+
+
+
 
 # /user/order
-class UserOrderView(View):
+class UserOrderView(LoginRequiredMixin, View):
     '''UserCenter- Oder Page'''
     def get(self, request):
+        # Get the order Information
+
         return render(request, 'user_center_order.html', {'page':'order'})
 
 # /user/address
-class AddressView(View):
+class AddressView(LoginRequiredMixin, View):
     '''UserCenter-Address'''
     def get(self, request):
-        return render(request, 'user_center_site.html',{'page':'address'})
+        # Get the default Address
+        user = request.user
+        # try:   # models.manage
+        #     address = Address.objects.get(user=user, is_default=True)
+        # except Address.DoesN otExist:
+        #     # 不存在默认收货地址
+        #     address = None
+        address = Address.objects.get_default_address(user)
+        return render(request, 'user_center_site.html', {'page': 'address', 'address': address})
+
+    def post(self, request):
+        '''Address 's addition'''
+        # 1. Get Data
+        receiver = request.POST.get('receiver')
+        addr = request.POST.get('addr')
+        zip_code = request.POST.get('zip_code')
+        phone = request.POST.get('phone')
+
+        # 2. Check Data
+        # 2.1 Check Data Integrity
+        if not all([receiver, addr, phone]):
+            return render(request,'user_center_site.html', {'errmsg':'数据不完整'})
+        # 2.2 Check Phone
+        if not re.match(r'^1[3|4|5|7|8][0-9]{9}$', phone):
+            return render(request, 'user_center_site.html', {'errmsg': '手机格式不正确'})
+
+        # 3. Process Data: Add Address
+
+            # 如果用户已存在默认收货地址，添加 的地址不作为默认收货地址，否则作为默认收货地址
+            # 获取登录用户对应User对象
+        user = request.user
+
+        address = Address.objects.get_default_address(user)
+
+        if address:
+            is_default = False
+        else:
+            is_default = True
+        # 添加地址
+
+        Address.objects.create(user=user,
+                               receiver=receiver,
+                               addr=addr,
+                               zip_code=zip_code,
+                               phone=phone,
+                               is_default=is_default)
+
+
+        # 4. Return
+        return redirect(reverse('user:address')) # GET

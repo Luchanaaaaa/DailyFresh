@@ -14,6 +14,7 @@ class GoodsType(BaseModel):
         db_table = 'df_goods_type'
         verbose_name = 'Type of Goods'
         verbose_name_plural = verbose_name
+        app_label = 'goods'
 
     def __str__(self):
         return self.name

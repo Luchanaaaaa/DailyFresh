@@ -12,6 +12,17 @@ class User(AbstractUser, BaseModel):
         verbose_name = 'User'
         verbose_name_plural = verbose_name
 
+# change the original result's
+class AddressManager(models.Manager):
+# 1. Change the result set of the original query
+    def get_default_address(self, user):
+        try:
+            address = self.get(user=user, is_default=True)
+        except self.model.DoesNotExist:
+            # 不存在默认收货地址
+            address = None
+
+        return address
 
 class Address(BaseModel):
     '''地址模型类'''
@@ -22,6 +33,7 @@ class Address(BaseModel):
     phone = models.CharField(max_length=11, verbose_name='TEL')
     is_default = models.BooleanField(default=False, verbose_name='Is Default')
 
+    objects = AddressManager()
     class Meta:
         db_table = 'df_address'
         verbose_name = 'Address'

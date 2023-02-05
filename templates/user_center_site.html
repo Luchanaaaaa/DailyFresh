@@ -6,7 +6,7 @@
 					<dl>
 						<dt>当前地址：</dt>
                         {% if address %}
-						    <dd>{{ address.addr }} （{{ address.receiver }} 收） {{ address.phone }}</dd>
+						    <dd>{{ address.addr }} （Receiver: {{ address.receiver }}） {{ address.phone }}</dd>
 					    {% else %}
                             <dd>无默认地址</dd>
                         {% endif %}
